@@ -1,0 +1,403 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class BankAccount
+{
+protected:
+    string accountId;
+    double balance;
+public:
+    BankAccount(string accountId, double balance);
+    BankAccount();
+    string getAccountId() const;
+    void setAccountId(string accountId);
+    double getBalance() const;
+    void setBalance(double balance);
+    virtual bool withdraw(double amount);
+    virtual bool deposit(double amount);
+    virtual void displayAccount();
+};
+
+BankAccount::BankAccount(string accountId, double balance) : accountId(accountId), balance(balance) {}
+
+BankAccount::BankAccount() { balance = 0; }
+string BankAccount::getAccountId() const
+{
+    return accountId;
+}
+
+void BankAccount::setAccountId(string accountId)
+{
+    this->accountId = accountId;
+}
+
+double BankAccount::getBalance() const
+{
+    return balance;
+}
+
+void BankAccount::setBalance(double balance)
+{
+    this->balance = balance;
+}
+
+bool BankAccount::withdraw(double amount)
+{
+    if (amount <= balance)
+    {
+        balance -= amount;
+        return true ;
+    }
+    return false ;
+
+}
+
+bool BankAccount::deposit(double amount)
+{
+    if (amount > 0)
+    {
+        balance += amount;
+        cout << "Thank you" << endl;
+        cout << "your new balance is " << balance <<  endl;
+        return true ;
+    }
+    cout << "This Amount not valid \n" ;
+    return false;
+}
+
+void BankAccount::displayAccount() {
+    cout << "Account ID : " << accountId <<"  (Basic)" << endl
+        << "Balance : " << balance << endl ;
+}
+
+
+class Client
+{
+private:
+    string name;
+    string address;
+    string phone;
+    BankAccount* bankAccount;
+
+public:
+    string getName() const;
+
+    void setName(string name);
+
+    BankAccount *getBankAccount() const;
+
+    void setBankAccount(BankAccount *bankAccount);
+
+    string getAddress() const;
+
+    void setAddress(string address);
+
+    string getPhone() const;
+
+    void setPhone(string phone);
+
+
+    Client(string name,string address, string phone, BankAccount* bankAccount);
+    Client(){}
+    friend ostream& operator<<(ostream& out ,const Client client){
+        out << "--------------------------"<<client.getName()<<"--------------------------\n"
+        << "Address :    "<< client.getAddress()<< "          phone : "<< client.getPhone()<<endl ;
+        client.getBankAccount()->displayAccount() ;
+        return out ;
+    }
+
+};
+Client::Client(string name,string address, string phone, BankAccount* bankAccount) : name(name),
+address(address),
+phone(phone), bankAccount(
+        bankAccount) {}
+
+string Client::getName() const
+{
+    return name;
+}
+
+void Client::setName(string name)
+{
+    Client::name = name;
+}
+
+string Client::getAddress() const
+{
+    return address;
+}
+
+void Client::setAddress(string address)
+{
+    Client::address = address;
+}
+
+string Client::getPhone() const
+{
+    return phone;
+}
+
+void Client::setPhone(string phone)
+{
+    Client::phone = phone;
+}
+
+BankAccount *Client::getBankAccount() const {
+    return bankAccount;
+}
+
+void Client::setBankAccount(BankAccount *bankAccount) {
+    Client::bankAccount = bankAccount;
+}
+
+
+class SavingsBankAccount : public BankAccount
+{
+protected:
+    double minimumBalance;
+public:
+    SavingsBankAccount(string accountId, double balance, double minimumBalance);
+
+    SavingsBankAccount();
+
+    double getMinimumBalance() const;
+
+    bool withdraw(double amount) override ;
+
+    bool deposit(double amount) override ;
+
+    void displayAccount() override ;
+    void setMinimumBalance(double minimumBalance);
+
+
+};
+SavingsBankAccount::SavingsBankAccount(string accountId, double balance, double minimumBalance)
+: BankAccount(accountId,balance)
+{
+    if (minimumBalance <= balance)
+    {
+        this->minimumBalance = minimumBalance;
+    }
+    else
+    {
+        cout << "please try again\n";
+    }
+}
+SavingsBankAccount::SavingsBankAccount(){
+    minimumBalance = 1000 ;
+}
+
+double SavingsBankAccount::getMinimumBalance() const
+{
+    return minimumBalance;
+}
+
+void SavingsBankAccount::setMinimumBalance(double minimumBalance)
+{
+    this->minimumBalance = minimumBalance;
+}
+
+bool SavingsBankAccount::withdraw(double amount)
+{
+    if (amount<=(balance-minimumBalance))
+    {
+        balance -= amount;
+        return true ;
+    }
+    return false ;
+}
+
+bool SavingsBankAccount::deposit(double amount)
+{
+    if (amount >= 100)
+    {
+        balance += amount;
+        cout << "Thank you" << endl;
+        cout << "your new balance is " << balance << endl;
+        return true ;
+    }
+    return false;
+}
+
+void SavingsBankAccount::displayAccount() {
+    cout << "Account ID : " <<accountId<<"  (Saving)" << endl
+        << "Balance : " << balance << endl
+        << "Minimum Balance : " << minimumBalance << endl ;
+}
+
+class BankingApplication
+{
+private:
+    BankAccount* Banks = new BankAccount[10] ;
+    Client clients[10];
+    int counter ;
+    string generateID(int c){
+        string Id = "FCI-" ;
+        if (c>0 && c<9) {
+            Id += "00";
+            Id += c+'0' ;
+        }
+        return Id ;
+    }
+public:
+    BankingApplication() {
+        counter = 0;
+        while (1){
+        cout << "Welcome to FCI Banking Application" << endl;
+
+        cout << "1. Create a New Account\n"
+             << "2. List Clients and Accounts\n"
+             << "3. Withdraw Money\n"
+             << "4. Deposit Money\n";
+        cout << "Please Enter Choice" << endl;
+        int clientChoice;
+        cin >> clientChoice;
+        if (clientChoice == 1) {
+            string name, address, phone;
+            int accountInput;
+            BankAccount *bankAccount;
+            cout << "Please Enter Client Name" << endl;
+            getline(cin, name);
+            getline(cin, name);
+
+            cout << "Please Enter Client Address " << endl;
+            getline(cin, address);
+
+            cout << "Please Enter Client Phone " << endl;
+            getline(cin, phone);
+
+
+            cout << " What Type of Account Do You Like?(1) Basic (2) Saving – Type 1 or 2 " << endl;
+
+            cin >> accountInput;
+            cout << " Please Enter the Starting Balance = " << endl;
+            double balance;
+            cin >> balance;
+
+            switch (accountInput) {
+                case 1:
+                    bankAccount = new BankAccount(generateID(counter + 1), balance);
+                    break;
+                case 2:
+                    bankAccount = new SavingsBankAccount(generateID(counter + 1), balance, 1000);
+                    break;
+            }
+            Client client(name, address, phone, bankAccount);
+            addClient(client);
+            counter++ ;
+            cout << "An account was created with ID " << client.getBankAccount()->getAccountId() <<
+                 " and Starting Balance " << balance << " L.E." << endl;
+
+        } else if (clientChoice == 2) {
+            display();
+        } else if (clientChoice == 3) {
+            cout << " Please Enter Account ID " << endl;
+            string id;
+            cin >> id  ;
+            int x = getAccountByID(id) ;
+            if (x!=-1){
+                int amount;
+                bool a = true ;
+                do {
+                    cout << " Please Enter The Amount to Withdraw " << endl;
+                    cin >> amount;
+                    if (!(clients[x].getBankAccount()->withdraw(amount)))
+                        cout << "Sorry. This is more than what you can withdraw.\n" ;
+                    else {
+                        cout <<"Account ID : " << clients[x].getBankAccount()->getAccountId() << endl
+                        << "New Balance : " << clients[x].getBankAccount()->getBalance() << endl ;
+                        a = false ;
+                    }
+                }while (a);
+            }
+        } else if (clientChoice == 4) {
+            cout << " Please Enter Account ID " << endl;
+            string id;
+            cin >> id  ;
+            int x = getAccountByID(id) ;
+            if (x!=-1) {
+                int amount;
+                bool a = true;
+                do {
+                    cout << " Please Enter The Amount to Withdraw " << endl;
+                    cin >> amount;
+                    if (!(clients[x].getBankAccount()->deposit(amount)))
+                        cout << "Sorry. This is more than what you can withdraw.\n";
+                    else {
+                        cout << "Account ID : " << clients[x].getBankAccount()->getAccountId() << endl
+                             << "New Balance : " << clients[x].getBankAccount()->getBalance() << endl;
+                        a = false ;
+                    }
+                } while (a);
+            }
+        } else {
+            break;
+        }
+    }
+
+    }
+    void addClient(Client client){
+        clients[counter] = client ;
+        Banks[counter] = *client.getBankAccount() ;
+    }
+    void display(){
+        for (int i = 0; i < counter; ++i) {
+            cout << clients[i] << endl ;
+        }
+    }
+    int getAccountByID(string ID){
+        bool status = false ;
+        for (int i = 0; i < counter; ++i) {
+            if (clients->getBankAccount()->getAccountId()==ID)
+            {
+                return i ;
+                status = true ;
+            }
+        }
+        if (!status){
+            return -1 ;
+        }
+    }
+};
+
+int main()
+{
+    BankingApplication x ;
+
+/*Test Case 1 :
+    Choice num 1
+    Add Name: Sara Mohamed Gamal
+    Add Address: 13 Albatal Ahmed St.,Giza
+    Add phone num :0502686203
+    Choice num 1
+    Balance: 1500
+    */
+    
+    /* Test Case 2:
+    Choice num 3
+    Enter Account ID: "it will be given"
+    The Amount to Withdraw :250
+    */
+
+    /* Test Case 3:
+    Choice num 1
+    Add Name: Sara Mohamed Gamal
+    Add Address: 13 Albatal Ahmed St.,Giza
+    Add phone num :0502686203
+    Choice num: 2
+    Balance: 1500
+    */
+
+    /* Test Case 4:
+    Choice num 2
+    Will Show you the basic and the saving
+    */
+
+   /* Test Case 5:
+   Choice num 4
+    Enter Account ID: "it will be given"
+    The Amount to Withdraw :500
+    */
+}
